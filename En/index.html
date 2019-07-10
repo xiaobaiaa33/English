@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!-- iconfont -->
+    <link rel="stylesheet" href="css/iconfont/iconfont.css">
+    <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/index.css">
+    <title>英语单词</title>
+</head>
+<body>
+    <div class="container">
+        <h3 class="text-center mt-5 mb-3">英语本</h3>
+        <!-- 英语 -->
+        <div class="input-group pb-3 col-lg-5 col-md-8 col-sm-12 m-auto">
+            <div class="input-group-prepend">
+                <span class="input-group-text iconfont icon-yingwen" id="basic-addon1"></span>
+            </div>
+            <input type="text" class="form-control" placeholder="English" aria-label="English" aria-describedby="basic-addon1">
+        </div>
+        <!-- 中文 -->
+        <div class="input-group pb-3 col-lg-5 col-md-8 col-sm-12 m-auto">
+            <div class="input-group-prepend">
+                <span class="input-group-text iconfont icon-zhongwen" id="basic-addon1"></span>
+            </div>
+            <input type="text" class="form-control" placeholder="Chinese" aria-label="Chinese" aria-describedby="basic-addon1">
+        </div>
+        <!-- 按钮 -->
+        <div class="text-center mb-4">
+            <button class="btn btn-primary disabled" data-todo="add">添加单词</button>
+            <button class="btn btn-dark" data-todo="exercise">练习</button>
+        </div>
+        <!-- 警告框 -->
+        <div class="alert-h">
+            <div class="alert alert-success col-lg-6 col-md-8 col-sm-12 m-auto d-none" role="succeed_alert"></div>
+            <div class="alert alert-danger col-lg-6 col-md-8 col-sm-12 m-auto d-none" role="fail_alert"></div>
+        </div>
+        <!-- 搜索框 -->
+        <div class="input-group mt-3 ml-5 col-lg-4 col-md-6 col-sm-10">
+            <input type="text" class="form-control" placeholder="请输入关键词" aria-label="search" aria-describedby="basic-addon2">
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary iconfont icon-sousuo" type="button" data-todo="search"></button>
+            </div>
+        </div>
+        <!-- 表格 -->
+        <table class="table table-bordered table-hover table-sm text-center ml-auto mr-auto mt-2 col-lg-10 col-sm-12">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col" class="w-10">#</th>
+                    <th scope="col" class="w-30">EN</th>
+                    <th scope="col" class="w-30">CH</th>
+                    <th scope="col">Operation</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <!-- 分页 -->
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-center d-none"></ul>
+        </nav>
+        <!-- 修改模态框 -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="exampleModalLabel">修改</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body"></div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                  <button type="button" class="btn btn-primary" data-todo="update">确认</button>
+                </div>
+              </div>
+            </div>
+        </div>
+    </div>  
+</body>
+<script src="node_modules/jquery/dist/jquery.min.js"></script>
+<script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="js/index.js"></script>
+<script src="js/public.js"></script>
+</html>

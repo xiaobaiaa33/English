@@ -1,0 +1,15 @@
+/* 警告框的高度 */
+.alert-h {
+    height: 50px;
+}
+.active {
+    color: #fff;
+    background-color: #007bff;
+}
+/* 适应宽度 */
+.w-30 {
+    width: 30% !important;
+}
+.w-10 {
+    width: 10% !important;
+}

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/exercise.css">
+    <link rel="stylesheet" href="css/style.css">
+    <title>复习</title>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="card m-auto p-0 col-sm-11 col-md-8 col-lg-6">
+            <h5 class="card-header">答题</h5>
+            <div class="card-body text-right">
+                <h5 class="card-title text-left">中译英</h5>
+                <div class="card-text text-center">
+                    <span class="d-block mb-4"></span>
+                    <input type="text" class="font-14 w-50" placeholder="请输入对应的英语">
+                </div>
+                <a href="javascript:;" class="btn btn-primary" data-todo="next">下一题</a>
+            </div>
+        </div>
+        <div class="text-center">
+            <button class="btn btn-danger col-lg-3 col-md-6 col-sm-11 mt-3 mb-3" data-todo="transform">英译中</button>
+        </div>
+        <div class="alert alert-danger col-lg-3 col-md-6 col-sm-11 m-auto d-none" role="error"></div>
+        <div class="alert alert-success col-lg-3 col-md-6 col-sm-11 m-auto d-none" role="right"></div>
+    </div>
+    
+</body>
+<script src="node_modules/jquery/dist/jquery.min.js"></script>
+<script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="js/exercise.js"></script>
+<script src="js/public.js"></script>
+</html>
