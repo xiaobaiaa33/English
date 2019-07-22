@@ -27,6 +27,7 @@ function add(btn,en_el,ch_el){
                         if (res.code==1){
                             let $succeed_info=$("[role=succeed_alert]");
                             close_alert($succeed_info,"添加成功");
+                            watch_word(5);
                         }else {
                             close_alert($fail_info,"单词已存在，请勿重复添加");
                         }
@@ -40,7 +41,6 @@ function add(btn,en_el,ch_el){
             en_el.focus();
             btn.addClass("disabled");
         }
-        watch_word(5);
     });
 }
 // 输入按钮是否可用
@@ -149,23 +149,23 @@ function update_btn(){
             let html=`
             <div class="input-group pb-3 col-md-8 col-sm-12 m-auto">
                 <div class="input-group-prepend">
-                    <span class="input-group-text iconfont icon-yingwen" id="basic-addon1"></span>
+                    <span class="input-group-text iconfont icon-yingwen"></span>
                 </div>
-                <input type="text" class="form-control" placeholder="English" aria-label="English" aria-describedby="basic-addon1" value="${$EN[0].innerHTML}">
+                <input type="text" class="form-control" placeholder="English" aria-label="model_English" aria-describedby="basic-addon3" value="${$EN[0].innerHTML}">
             </div>
             <div class="input-group pb-3 col-md-8 col-sm-12 m-auto">
                 <div class="input-group-prepend">
-                    <span class="input-group-text iconfont icon-zhongwen" id="basic-addon1"></span>
+                    <span class="input-group-text iconfont icon-zhongwen"></span>
                 </div>
-                <input type="text" class="form-control" placeholder="Chinese" aria-label="Chinese" aria-describedby="basic-addon1" value="${$CH[0].innerHTML}">
+                <input type="text" class="form-control" placeholder="Chinese" aria-label="model_Chinese" aria-describedby="basic-addon4" value="${$CH[0].innerHTML}">
             </div>
             `;
             $body.append(html);
-            // 绑定修改确认1
+            // 绑定修改确认
             let $btn2=$("[data-todo=update]");
             $btn2.click(function(){
-                $new_EN=$(".modal-body input[aria-label=English]").val();
-                $new_CH=$(".modal-body input[aria-label=Chinese]").val();
+                $new_EN=$(".modal-body input[aria-label=model_English]").val();
+                $new_CH=$(".modal-body input[aria-label=model_Chinese]").val();
                 update_word($new_EN,$new_CH,$id);
             })
         });
@@ -203,6 +203,7 @@ function update_word(en,ch,id){
         data:{en,ch,id},
         dataType:"json"
     }).then(function(res){
+        // 关闭模态框
         $close.click();
         watch_word(5);
         console.log(res.msg);
@@ -235,6 +236,11 @@ function get_page_count(pno){
   </li>`;
     for (let i=0;i<pno;i++){
         html+=`<li class="page-item"><a class="page-link" href="javascript:;">${i+1}</a></li>`;
+        if(i>4){
+            html+=`<li class="page-item"><a class="page-link" href="javascript:;">...</a></li>`;
+            html+=`<li class="page-item"><a class="page-link" href="javascript:;">${pno}</a></li>`;
+            break;
+        }
     }
     html+=`<li class="page-item">
     <a class="page-link" href="javascript:;" aria-label="Next">
@@ -244,7 +250,7 @@ function get_page_count(pno){
     </li>`;
     $ul.append(html).children(`li:eq(${parseInt(localStorage.getItem("page"))+1})`).addClass("active");
     page_btn(pno);
-}   
+} 
 
 // 分页按钮
 function page_btn(pno){
@@ -335,3 +341,5 @@ function search(){
         }
     })
 }
+
+//分页隐藏

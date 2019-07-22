@@ -4,8 +4,8 @@ let express=require("express");
 let Word_router=require("./routing/word");
 
 let server=express();
-server.listen(3000,function(){
-    console.log("服务器开启，监听3000");
+server.listen(5000,function(){
+    console.log("服务器开启，监听5000");
 });
 
 // 挂载页面
