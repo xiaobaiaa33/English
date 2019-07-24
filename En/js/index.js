@@ -15,8 +15,6 @@ function add(btn,en_el,ch_el){
     btn.click(function(){
         if (!btn.hasClass("disabled")){
             let $fail_info=$("[role=fail_alert]");
-            // console.log($EN.val());
-            // console.log($CH.val());
             if (/[a-zA-Z]+/.test(en_el.val()) && /[\u4e00-\u9fa5]+/.test(ch_el.val())){
                 $.ajax({
                     url:"/word/add",
@@ -48,14 +46,14 @@ function add(btn,en_el,ch_el){
  * 
  * @param {*} el 当然输入的input
  */
-function ben_whether(el){
+function btn_whether(el){
     let $add=$("[data-todo=add]");
     el.keyup(function(event){
         if (event.keyCode==13){
             $add.trigger("click");
         }
-        for (let i=0;i<$(".input-group-prepend").next().length;i++){
-            if ($(`input:eq(${i})`).val()==""){
+        for (let i=0;i<$("[deed=add]").next().length;i++){
+            if (!$(`input:eq(${i})`).val()){
                 $add.addClass("disabled");
                 return false;
             }
@@ -69,8 +67,8 @@ function isAdd(){
     let $EN=$("[aria-label=English]");
     $EN.focus();
     let $CH=$("[aria-label=Chinese]");
-    ben_whether($EN);
-    ben_whether($CH);
+    btn_whether($EN);
+    btn_whether($CH);
     add($("[data-todo=add]"),$EN,$CH);
 }
 
@@ -206,9 +204,9 @@ function update_word(en,ch,id){
         // 关闭模态框
         $close.click();
         watch_word(5);
-        console.log(res.msg);
+        // console.log(res.msg);
     }).catch(function(res){
-        console.log(res.msg);
+        // console.log(res.msg);
     });
     
 }
@@ -228,27 +226,14 @@ function to_exercise(){
 function get_page_count(pno){
     let $ul=$("ul.pagination");
     $ul.removeClass("d-none").html("");
-    let html=`<li class="page-item disabled">
-    <a class="page-link" href="javascript:;" aria-label="Previous">
-        <span aria-hidden="true">&laquo;</span>
-        <span class="sr-only">Previous</span>
-    </a>
-  </li>`;
-    for (let i=0;i<pno;i++){
-        html+=`<li class="page-item"><a class="page-link" href="javascript:;">${i+1}</a></li>`;
-        if(i>4){
-            html+=`<li class="page-item"><a class="page-link" href="javascript:;">...</a></li>`;
-            html+=`<li class="page-item"><a class="page-link" href="javascript:;">${pno}</a></li>`;
-            break;
-        }
+    let now_page=parseInt(localStorage.getItem("page"))+1;
+    refreshPages(pno,now_page,$ul);
+    console.log(now_page,pno);
+    if (now_page<=4){
+        $ul.children(`li:eq(${now_page})`).addClass("active");
+    }else {
+        $ul.children(`li:eq(4)`).addClass("active");
     }
-    html+=`<li class="page-item">
-    <a class="page-link" href="javascript:;" aria-label="Next">
-        <span aria-hidden="true">&raquo;</span>
-        <span class="sr-only">Next</span>
-    </a>
-    </li>`;
-    $ul.append(html).children(`li:eq(${parseInt(localStorage.getItem("page"))+1})`).addClass("active");
     page_btn(pno);
 } 
 
@@ -307,6 +292,8 @@ function num_page_btn(){
 function search(){
     let $btn=$("[data-todo=search]");
     let $val=$("[aria-label=search]");
+    let updata_start=1;
+    localStorage.setItem("update_page",updata_start);
     $btn.click(function(){
         fetch("/word/search?keyword="+$val.val()).then(function(res){
             return res.json();
@@ -331,6 +318,7 @@ function search(){
                 }
                 $tbody.append(html);
                 get_page_count(Math.ceil(myjson.msg.length/5));
+                // refreshPages(Math.ceil(myjson.msg.length/5),1,$("ul.pagination"));
                 del_btn();
             }
         })
@@ -342,4 +330,87 @@ function search(){
     })
 }
 
-//分页隐藏
+//分页隐藏，显示省略号
+/**
+ * 获取分页
+ * @param totalPage  页码总量
+ * @param currentPage 当前页码
+ * @returns {String} 返回一个代码片段
+ */
+function getPagination(totalPage, currentPage){
+    let paginationInfo = `
+        <li class="page-item disabled">
+            <a class="page-link" href="javascript:;" aria-label="Previous" οnclick="refreshPages(${totalPage},(${currentPage}-1)>
+                <span aria-hidden="true" >&laquo;</span>
+                <span class="sr-only">Previous</span>
+            </a>
+        </li>`;
+	if(totalPage<=10){
+		for(let i=1; i<=totalPage; i++){
+            paginationInfo += `
+            <li class="page-item">
+                <a class="page-link" href="javascript:;" οnclick="refreshPages(${totalPage},${i})">${i}</a>
+            </li>`;
+		}
+	}
+	else{
+		if(currentPage<=3){
+			for(let i=1; i<=currentPage+2; i++){
+                paginationInfo += 
+                `<li class="page-item">
+                    <a class="page-link" href="javascript:;" οnclick="refreshPages(${totalPage},${i})">${i}</a>
+                </li>`;
+			}
+			paginationInfo += `<li class="page-item"><a class="page-link" href="javascript:;">...</a></li>`;
+            paginationInfo +=`
+                <li class="page-item">
+                    <a class="page-link" href="javascript:;" οnclick="refreshPages(${totalPage},${totalPage})">${totalPage}</a>
+                </li>`;
+		}else if(currentPage<=totalPage-5){
+            paginationInfo += `
+                <li class="page-item">
+                    <a class="page-link" href="javascript:;" οnclick="refreshPages(${totalPage},1)">1</a>
+                </li>`;
+			paginationInfo += `<li class="page-item"><a class="page-link" href="javascript:;">...</a></li>`;
+			for(let i=currentPage-1; i<=currentPage+2; i++){
+                paginationInfo += `
+                    <li class="page-item">
+                        <a class="page-link" href="javascript:;" οnclick="refreshPages(${totalPage},${i})">${i}</a>
+                    </li>`;
+			}
+			paginationInfo += `<li class="page-item"><a class="page-link" href="javascript:;">...</a></li>`;
+            paginationInfo += `
+                <li class="page-item">
+                    <a class="page-link" href="javascript:;" οnclick="refreshPages(${totalPage},${totalPage})">${totalPage}</a>
+                </li>`;
+		}else{
+            paginationInfo += `
+                <li class="page-item">
+                    <a class="page-link" href="javascript:;" οnclick="refreshPages(${totalPage},1)">1</a>
+                </li>`;
+			paginationInfo += `<li class="page-item"><a class="page-link" href="javascript:;">...</a></li>`;
+			for(let i=currentPage-1; i<=totalPage; i++){
+                paginationInfo += `
+                    <li class="page-item">
+                        <a class="page-link" href="javascript:;" οnclick="refreshPages(${totalPage},${i})">${i}</a>
+                    </li>`;
+			}
+		}
+	}
+    paginationInfo += `
+        <li class="page-item">
+            <a class="page-link" href="javascript:;" aria-label="Next" οnclick="refreshPages(${totalPage},(${currentPage}+1)>
+                <span aria-hidden="true">&raquo;</span>
+                <span class="sr-only">Next</span>
+            </a>
+        </li>`;
+	return paginationInfo;
+}
+// 更新分页
+function refreshPages(totalPage, currentPage,el){
+	if(currentPage<1 || currentPage>totalPage){
+		return;
+	}
+    let paginationInfo = getPagination(totalPage, currentPage);
+    el.html(paginationInfo);
+}
