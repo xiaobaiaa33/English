@@ -2,7 +2,7 @@ $(function(){
     isAdd();
     watch_word(5);
     to_exercise();
-    search();
+    search(5);
 })
 
 // 添加单词
@@ -75,7 +75,7 @@ function isAdd(){
 // 查看所有单词
 function watch_word(pageSize){
     let start=0;
-    localStorage.setItem("page",start);
+    sessionStorage.setItem("page",start);
     ajax_word(start,pageSize);
 }
 // 请求单词数据
@@ -114,7 +114,6 @@ function ajax_word(start,pageSize){
         }
         $tbody.append(html);
         get_page_count(Math.ceil(res.length/pageSize));
-        // console.log($tbody.html());
         del_btn();
         update_btn();
     });
@@ -222,29 +221,52 @@ function to_exercise(){
 /**
  * 
  * @param {*} pno 总页数
+ * @param {*} isSearch 是否是查询后的结果，True是查询过的结果,false是全部单词
  */
-function get_page_count(pno){
+function get_page_count(pno,isSearch){
     let $ul=$("ul.pagination");
     $ul.removeClass("d-none").html("");
-    let now_page=parseInt(localStorage.getItem("page"))+1;
-    refreshPages(pno,now_page,$ul);
-    console.log(now_page,pno);
-    if (now_page<=4){
-        $ul.children(`li:eq(${now_page})`).addClass("active");
+    let now_page;
+    if (isSearch){
+        now_page=parseInt(sessionStorage.getItem("search_page"))+1;
     }else {
-        $ul.children(`li:eq(4)`).addClass("active");
+        now_page=parseInt(sessionStorage.getItem("page"))+1;
     }
-    page_btn(pno);
+    refreshPages(pno,now_page,$ul);
+    // 总页数小于等于10，按照变量获取位置
+    if (pno<=10){
+        $ul.children(`li:eq(${now_page})`).addClass("active");
+    // 大于10的会缩短分页，特殊处理
+    }else {
+        if (now_page<=4){
+            $ul.children(`li:eq(${now_page})`).addClass("active");
+        }else {
+            $ul.children(`li:eq(4)`).addClass("active");
+        }
+    }
+    page_btn(pno,isSearch);
 } 
 
 // 分页按钮
-function page_btn(pno){
-    let start=localStorage.getItem("page");
+/**
+ * 
+ * @param {*} pno 总页数
+ * @param {*} isSearch 是否是查询后的结果，True是查询过的结果,false是全部单词
+ */
+function page_btn(pno,isSearch){
     let $previous_btn=$("[aria-label=Previous]");
     let $next_btn=$("[aria-label=Next]");
-    ispage($previous_btn,start==0,false);
-    ispage($next_btn,start==pno-1,true);
-    num_page_btn()
+    let start;
+    if (isSearch){
+        start=sessionStorage.getItem("search_page");
+        ispage($previous_btn,start==0,false,start,true);
+        ispage($next_btn,start==pno-1,true,start,true);
+    }else {
+        start=sessionStorage.getItem("page");
+        ispage($previous_btn,start==0,false,start);
+        ispage($next_btn,start==pno-1,true,start);
+    }
+    num_page_btn(isSearch)
 }
 
 /**
@@ -252,10 +274,12 @@ function page_btn(pno){
  * @param {*} el 要控制的分页按钮对象
  * @param {*} where 控制按钮是否可用的条件
  * @param {*} isAdd 增加是true,减少是false
+ * @param {*} start 当前页码
+ * @param {*} isSearch 是否是查询后的结果，True是查询过的结果,false是全部单词
  */
 // 换页
-function ispage(el,where,isAdd){
-    let start=localStorage.getItem("page");
+function ispage(el,where,isAdd,start,isSearch){
+    // let start=sessionStorage.getItem("page");
     if (where){
         el.parent().addClass("disabled");
     }else {
@@ -268,22 +292,40 @@ function ispage(el,where,isAdd){
             }else {
                 start--;
             }
-            localStorage.setItem("page",start);
-            ajax_word(start*5,5);
+            if (isSearch){
+                // console.log("up "+start);
+                sessionStorage.setItem("search_page",start);
+                query(start,5);
+            }else {
+                // console.log("p "+start);
+                sessionStorage.setItem("page",start);
+                ajax_word(start*5,5);
+            }
+            
         }
     })
 }
 
 // 数字按钮
-function num_page_btn(){
+/**
+ * 
+ * @param {*} isSearch 是否是查询后的结果，True是查询过的结果,false是全部单词
+ */
+function num_page_btn(isSearch){
     let $ul=$("ul.pagination");
     for (let i=1;i<$ul.children().length-1;i++){
         $child=$ul.children(`li:eq(${i})`);
         // console.log($child);
         $child.click(function(){
             let page=$(this).children().html()-1;
-            localStorage.setItem("page",page);
-            ajax_word(page*5,5);
+            if (isSearch){
+                sessionStorage.setItem("search_page",page);
+                query(page,5);
+            }else {
+                sessionStorage.setItem("page",page);
+                ajax_word(page*5,5);
+            }
+            
         })
     }
 }
@@ -291,53 +333,78 @@ function num_page_btn(){
 // 模糊搜索
 function search(){
     let $btn=$("[data-todo=search]");
-    let $val=$("[aria-label=search]");
-    let updata_start=1;
-    localStorage.setItem("update_page",updata_start);
+    // 更新页码的初始值
+    let start=0;
+    sessionStorage.setItem("search_page",start);
     $btn.click(function(){
-        fetch("/word/search?keyword="+$val.val()).then(function(res){
-            return res.json();
-        }).then(function(myjson){
-            console.log(myjson);
-            let $tbody=$("table tbody");
-            $tbody.html("");
-            let html="";
-            if (myjson.code==1){
-                for (let i=0;i<myjson.msg.length;i++){
-                    html+=`
-                    <tr>
-                        <td class="align-middle">${i+1}</td>
-                        <td class="align-middle">${myjson.msg[i].en}</td>
-                        <td class="align-middle">${myjson.msg[i].ch}</td>
-                        <td data-id="${myjson.msg[i].id}">
-                            <button class="btn btn-info iconfont icon-xiugai" data-todo='updata'></button>
-                            <button class="btn btn-danger iconfont icon-Group-" data-todo='del'></button>
-                        </td>
-                    </tr>
-                    `;
-                }
-                $tbody.append(html);
-                get_page_count(Math.ceil(myjson.msg.length/5));
-                // refreshPages(Math.ceil(myjson.msg.length/5),1,$("ul.pagination"));
-                del_btn();
-            }
-        })
+        query(start,5);
     })
-    $val.keyup(function(event){
+    $("[aria-label=search]").keyup(function(event){
         if (event.keyCode==13){
             $btn.trigger("click");
         }
     })
 }
 
+//查询请求
+/**
+ * 
+ * @param {*} start 当前页码
+ * @param {*} pageSize 每页数量
+ */
+function query(start,pageSize){
+    start=parseInt(start);//转为整型
+    let $val=$("[aria-label=search]");
+    // 如果为空，显示全部单词
+    if (!$val.val()){
+        ajax_word(0,5);
+        return;
+    }
+    fetch("/word/search?keyword="+$val.val()).then(function(res){
+        return res.json();
+    }).then(function(myjson){
+        console.log(myjson);
+        if (myjson.code==1){
+            let $tbody=$("table tbody");
+            $tbody.html("");
+            let html="";
+            for (let i=start;i<myjson.msg.length;i++){
+                if (i==pageSize+start){
+                    break;
+                }
+                html+=`
+                <tr>
+                    <td class="align-middle">${i+1}</td>
+                    <td class="align-middle">${myjson.msg[i].en}</td>
+                    <td class="align-middle">${myjson.msg[i].ch}</td>
+                    <td data-id="${myjson.msg[i].id}">
+                        <button class="btn btn-info iconfont icon-xiugai" data-todo='updata'></button>
+                        <button class="btn btn-danger iconfont icon-Group-" data-todo='del'></button>
+                    </td>
+                </tr>
+                `;
+            }
+            $tbody.append(html);
+            get_page_count(Math.ceil(myjson.msg.length/5),true);
+            del_btn();
+            update_btn();
+        }else {
+            let $fail_info=$("[role=fail_alert]");
+            close_alert($fail_info,myjson.msg);
+        }
+    })
+    
+}
+
 //分页隐藏，显示省略号
 /**
  * 获取分页
- * @param totalPage  页码总量
+ * @param totalPage  总页数
  * @param currentPage 当前页码
  * @returns {String} 返回一个代码片段
+ * 
  */
-function getPagination(totalPage, currentPage){
+function getPagination(totalPage,currentPage){
     let paginationInfo = `
         <li class="page-item disabled">
             <a class="page-link" href="javascript:;" aria-label="Previous" οnclick="refreshPages(${totalPage},(${currentPage}-1)>
@@ -407,10 +474,16 @@ function getPagination(totalPage, currentPage){
 	return paginationInfo;
 }
 // 更新分页
-function refreshPages(totalPage, currentPage,el){
+/**
+ * 
+ * @param {*} totalPage 总页数
+ * @param {*} currentPage 当前页码
+ * @param {*} el 要渲染的元素
+ */
+function refreshPages(totalPage,currentPage,el){
 	if(currentPage<1 || currentPage>totalPage){
 		return;
 	}
-    let paginationInfo = getPagination(totalPage, currentPage);
+    let paginationInfo = getPagination(totalPage,currentPage);
     el.html(paginationInfo);
 }

@@ -59,12 +59,12 @@ router.get("/update",(req,res)=>{
 // 搜索
 router.get("/search",(req,res)=>{
     let keyword=req.query.keyword;
-    if (/[\u4e00-\u9fa5]+/.test(keyword)){
+    if (/^[\u4e00-\u9fa5]+$/.test(keyword)){
         pool.query("SELECT id,en,ch FROM en_word WHERE ch LIKE ?",["%"+keyword+"%"],(err,result)=>{
             if (err) throw err;
             res.send({code:1,msg:result});
         });
-    }else if(/[a-zA-Z]+/.test(keyword)){
+    }else if(/^[a-zA-Z]+$/.test(keyword)){
         pool.query("SELECT id,en,ch FROM en_word WHERE en LIKE ?",["%"+keyword+"%"],(err,result)=>{
             if (err) throw err;
             res.send({code:1,msg:result});
